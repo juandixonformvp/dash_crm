@@ -7,13 +7,13 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dateutil.parser
 
-from sfManager import sf_Manager
+# from sfManager import sf_Manager
 
 server = flask.Flask(__name__)
 app = dash.Dash(__name__, server=server)
 app.config.suppress_callback_exceptions = True
 
-sf_manager = sf_Manager()
+# sf_manager = sf_Manager()
 
 millnames = ["", " K", " M", " B", " T"]  # used to convert numbers
 
