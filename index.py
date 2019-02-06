@@ -9,7 +9,7 @@ import plotly.plotly as py
 from plotly import graph_objs as go
 import math
 from app import app, server, sf_manager
-from apps import opportunities, cases, leads
+# from apps import opportunities, cases, leads
 
 app.layout = html.Div(
     [
@@ -47,12 +47,15 @@ app.layout = html.Div(
 
         # divs that save dataframe for each tab
         html.Div(
-            sf_manager.get_opportunities().to_json(orient="split"),  # opportunities df
+            # sf_manager.get_opportunities().to_json(orient="split"),  # opportunities df
             id="opportunities_df",
             style={"display": "none"},
         ),
-        html.Div(sf_manager.get_leads().to_json(orient="split"), id="leads_df", style={"display": "none"}),  # leads df
-        html.Div(sf_manager.get_cases().to_json(orient="split"), id="cases_df", style={"display": "none"}),  # cases df
+        # html.Div(sf_manager.get_leads().to_json(orient="split"), id="leads_df", style={"display": "none"}),  # leads df
+        # html.Div(sf_manager.get_cases().to_json(orient="split"), id="cases_df", style={"display": "none"}),  # cases df
+
+        html.Div(id="leads_df", style={"display": "none"}),  # leads df
+        html.Div( id="cases_df", style={"display": "none"}),  # cases df
 
         # Tab content
         html.Div(id="tab_content", className="row", style={"margin": "2% 3%"}),

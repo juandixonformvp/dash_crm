@@ -11,7 +11,7 @@ class sf_Manager():
         #     password="PASSWORD",
         #     security_token="TOKEN"
         # )
-        return 0
+        return None
 
     def login(self):
         # self.sf = Salesforce(
