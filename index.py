@@ -10,17 +10,18 @@ from plotly import graph_objs as go
 import math
 from app import app, server, sf_manager
 # from apps import opportunities, cases, leads
+from apps import opportunities
 
 app.layout = html.Div(
     [
         # header
         html.Div([
 
-            html.Span("CRM App using Salesforce API", className='app-title'),
+            html.Span("FI Hackathon App using Redshift API", className='app-title'),
 
             html.Div(
                 html.Img(
-                    src='https://s3-us-west-1.amazonaws.com/plotly-tutorials/logo/new-branding/dash-logo-by-plotly-stripe-inverted.png',
+                    src='https://www.ficonsulting.com/wp-content/uploads/2018/10/home-logo.png',
                     height="100%")
                 , style={"float": "right", "height": "100%"})
         ],
@@ -38,7 +39,7 @@ app.layout = html.Div(
                     dcc.Tab(label="Leads", value="leads_tab"),
                     dcc.Tab(id="cases_tab", label="Cases", value="cases_tab"),
                 ],
-                value="leads_tab",
+                value="opportunities_tab",
             )
 
         ],
@@ -80,10 +81,10 @@ app.layout = html.Div(
 def render_content(tab):
     if tab == "opportunities_tab":
         return opportunities.layout
-    elif tab == "cases_tab":
-        return cases.layout
-    elif tab == "leads_tab":
-        return leads.layout
+    # elif tab == "cases_tab":
+    #     return cases.layout
+    # elif tab == "leads_tab":
+    #     return leads.layout
     else:
         return opportunities.layout
 

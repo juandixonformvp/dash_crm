@@ -13,7 +13,8 @@ import dash_html_components as html
 import plotly.plotly as py
 from plotly import graph_objs as go
 
-from app import app, indicator, millify, df_to_table, sf_manager
+# from app import app, indicator, millify, df_to_table, sf_manager
+from app import app, indicator, sf_manager
 
 
 def converted_opportunities(period, source, df):
@@ -556,160 +557,160 @@ layout = [
     ),
 ]
 
-
-# updates heatmap figure based on dropdowns values or df updates
-@app.callback(
-    Output("heatmap", "figure"),
-    [Input("heatmap_dropdown", "value"), Input("opportunities_df", "children")],
-)
-def heat_map_callback(stage, df):
-    df = pd.read_json(df, orient="split")
-    df = df[pd.notnull(df["Type"])]
-    x = []
-    y = df["Type"].unique()
-    if stage == "all_s":
-        x = df["StageName"].unique()
-    elif stage == "cold":
-        x = ["Needs Analysis", "Prospecting", "Qualification"]
-    elif stage == "warm":
-        x = ["Value Proposition", "Id. Decision Makers", "Perception Analysis"]
-    else:
-        x = ["Proposal/Price Quote", "Negotiation/Review", "Closed Won"]
-    return heat_map_fig(df, x, y)
-
-
-# updates converted opportunity count graph based on dropdowns values or df updates
-@app.callback(
-    Output("converted_count", "figure"),
-    [
-        Input("converted_opportunities_dropdown", "value"),
-        Input("source_dropdown", "value"),
-        Input("opportunities_df", "children"),
-    ],
-)
-def converted_opportunity_callback(period, source, df):
-    df = pd.read_json(df, orient="split")
-    return converted_opportunities(period, source, df)
-
-
-# updates left indicator value based on df updates
-@app.callback(
-    Output("left_opportunities_indicator", "children"),
-    [Input("opportunities_df", "children")],
-)
-def left_opportunities_indicator_callback(df):
-    df = pd.read_json(df, orient="split")
-    won = millify(str(df[df["IsWon"] == 1]["Amount"].sum()))
-    return won
-
-
-# updates middle indicator value based on df updates
-@app.callback(
-    Output("middle_opportunities_indicator", "children"),
-    [Input("opportunities_df", "children")],
-)
-def middle_opportunities_indicator_callback(df):
-    df = pd.read_json(df, orient="split")
-    active = millify(
-        str(df[(df["IsClosed"] == 0)]["Amount"].sum())
-    )
-    return active
-
-
-# updates right indicator value based on df updates
-@app.callback(
-    Output("right_opportunities_indicator", "children"),
-    [Input("opportunities_df", "children")],
-)
-def right_opportunities_indicator_callback(df):
-    df = pd.read_json(df, orient="split")
-    lost = millify(
-        str(
-            df[
-                (df["IsWon"] == 0) & (df["IsClosed"] == 1)
-                ]["Amount"].sum()
-        )
-    )
-    return lost
-
-
-# hide/show modal
-@app.callback(
-    Output("opportunities_modal", "style"), [Input("new_opportunity", "n_clicks")]
-)
-def display_opportunities_modal_callback(n):
-    if n > 0:
-        return {"display": "block"}
-    return {"display": "none"}
-
-
-# reset to 0 add button n_clicks property
-@app.callback(
-    Output("new_opportunity", "n_clicks"),
-    [
-        Input("opportunities_modal_close", "n_clicks"),
-        Input("submit_new_opportunity", "n_clicks"),
-    ],
-)
-def close_modal_callback(n, n2):
-    return 0
-
-
-# add new opportunity to salesforce and stores new df in hidden div
-@app.callback(
-    Output("opportunities_df", "children"),
-    [Input("submit_new_opportunity", "n_clicks")],
-    [
-        State("new_opportunity_name", "value"),
-        State("new_opportunity_stage", "value"),
-        State("new_opportunity_amount", "value"),
-        State("new_opportunity_probability", "value"),
-        State("new_opportunity_date", "date"),
-        State("new_opportunity_type", "value"),
-        State("new_opportunity_source", "value"),
-        State("opportunities_df", "children"),
-    ],
-)
-def add_opportunity_callback(
-        n_clicks, name, stage, amount, probability, date, o_type, source, current_df
-):
-    if n_clicks > 0:
-        if name == "":
-            name = "Not named yet"
-        query = {
-            "Name": name,
-            "StageName": stage,
-            "Amount": amount,
-            "Probability": probability,
-            "CloseDate": date,
-            "Type": o_type,
-            "LeadSource": source,
-        }
-
-        sf_manager.add_opportunity(query)
-
-        df = sf_manager.get_opportunities()
-
-        return df.to_json(orient="split")
-
-    return current_df
-
-
-# updates top open opportunities based on df updates
-@app.callback(
-    Output("top_open_opportunities", "children"),
-    [Input("opportunities_df", "children")],
-)
-def top_open_opportunities_callback(df):
-    df = pd.read_json(df, orient="split")
-    return top_open_opportunities(df)
-
-
-# updates top lost opportunities based on df updates
-@app.callback(
-    Output("top_lost_opportunities", "children"),
-    [Input("opportunities_df", "children")],
-)
-def top_lost_opportunities_callback(df):
-    df = pd.read_json(df, orient="split")
-    return top_lost_opportunities(df)
+#
+# # updates heatmap figure based on dropdowns values or df updates
+# @app.callback(
+#     Output("heatmap", "figure"),
+#     [Input("heatmap_dropdown", "value"), Input("opportunities_df", "children")],
+# )
+# def heat_map_callback(stage, df):
+#     df = pd.read_json(df, orient="split")
+#     df = df[pd.notnull(df["Type"])]
+#     x = []
+#     y = df["Type"].unique()
+#     if stage == "all_s":
+#         x = df["StageName"].unique()
+#     elif stage == "cold":
+#         x = ["Needs Analysis", "Prospecting", "Qualification"]
+#     elif stage == "warm":
+#         x = ["Value Proposition", "Id. Decision Makers", "Perception Analysis"]
+#     else:
+#         x = ["Proposal/Price Quote", "Negotiation/Review", "Closed Won"]
+#     return heat_map_fig(df, x, y)
+#
+#
+# # updates converted opportunity count graph based on dropdowns values or df updates
+# @app.callback(
+#     Output("converted_count", "figure"),
+#     [
+#         Input("converted_opportunities_dropdown", "value"),
+#         Input("source_dropdown", "value"),
+#         Input("opportunities_df", "children"),
+#     ],
+# )
+# def converted_opportunity_callback(period, source, df):
+#     df = pd.read_json(df, orient="split")
+#     return converted_opportunities(period, source, df)
+#
+#
+# # updates left indicator value based on df updates
+# @app.callback(
+#     Output("left_opportunities_indicator", "children"),
+#     [Input("opportunities_df", "children")],
+# )
+# def left_opportunities_indicator_callback(df):
+#     df = pd.read_json(df, orient="split")
+#     won = millify(str(df[df["IsWon"] == 1]["Amount"].sum()))
+#     return won
+#
+#
+# # updates middle indicator value based on df updates
+# @app.callback(
+#     Output("middle_opportunities_indicator", "children"),
+#     [Input("opportunities_df", "children")],
+# )
+# def middle_opportunities_indicator_callback(df):
+#     df = pd.read_json(df, orient="split")
+#     active = millify(
+#         str(df[(df["IsClosed"] == 0)]["Amount"].sum())
+#     )
+#     return active
+#
+#
+# # updates right indicator value based on df updates
+# @app.callback(
+#     Output("right_opportunities_indicator", "children"),
+#     [Input("opportunities_df", "children")],
+# )
+# def right_opportunities_indicator_callback(df):
+#     df = pd.read_json(df, orient="split")
+#     lost = millify(
+#         str(
+#             df[
+#                 (df["IsWon"] == 0) & (df["IsClosed"] == 1)
+#                 ]["Amount"].sum()
+#         )
+#     )
+#     return lost
+#
+#
+# # hide/show modal
+# @app.callback(
+#     Output("opportunities_modal", "style"), [Input("new_opportunity", "n_clicks")]
+# )
+# def display_opportunities_modal_callback(n):
+#     if n > 0:
+#         return {"display": "block"}
+#     return {"display": "none"}
+#
+#
+# # reset to 0 add button n_clicks property
+# @app.callback(
+#     Output("new_opportunity", "n_clicks"),
+#     [
+#         Input("opportunities_modal_close", "n_clicks"),
+#         Input("submit_new_opportunity", "n_clicks"),
+#     ],
+# )
+# def close_modal_callback(n, n2):
+#     return 0
+#
+#
+# # add new opportunity to salesforce and stores new df in hidden div
+# @app.callback(
+#     Output("opportunities_df", "children"),
+#     [Input("submit_new_opportunity", "n_clicks")],
+#     [
+#         State("new_opportunity_name", "value"),
+#         State("new_opportunity_stage", "value"),
+#         State("new_opportunity_amount", "value"),
+#         State("new_opportunity_probability", "value"),
+#         State("new_opportunity_date", "date"),
+#         State("new_opportunity_type", "value"),
+#         State("new_opportunity_source", "value"),
+#         State("opportunities_df", "children"),
+#     ],
+# )
+# def add_opportunity_callback(
+#         n_clicks, name, stage, amount, probability, date, o_type, source, current_df
+# ):
+#     if n_clicks > 0:
+#         if name == "":
+#             name = "Not named yet"
+#         query = {
+#             "Name": name,
+#             "StageName": stage,
+#             "Amount": amount,
+#             "Probability": probability,
+#             "CloseDate": date,
+#             "Type": o_type,
+#             "LeadSource": source,
+#         }
+#
+#         sf_manager.add_opportunity(query)
+#
+#         df = sf_manager.get_opportunities()
+#
+#         return df.to_json(orient="split")
+#
+#     return current_df
+#
+#
+# # updates top open opportunities based on df updates
+# @app.callback(
+#     Output("top_open_opportunities", "children"),
+#     [Input("opportunities_df", "children")],
+# )
+# def top_open_opportunities_callback(df):
+#     df = pd.read_json(df, orient="split")
+#     return top_open_opportunities(df)
+#
+#
+# # updates top lost opportunities based on df updates
+# @app.callback(
+#     Output("top_lost_opportunities", "children"),
+#     [Input("opportunities_df", "children")],
+# )
+# def top_lost_opportunities_callback(df):
+#     df = pd.read_json(df, orient="split")
+#     return top_lost_opportunities(df)
