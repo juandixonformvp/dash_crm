@@ -380,19 +380,19 @@ layout = [
     # top controls
     html.Div(
         [
-            html.Div(
-                dcc.Dropdown(
-                    id="converted_opportunities_dropdown",
-                    options=[
-                        {"label": "By day", "value": "D"},
-                        {"label": "By week", "value": "W-MON"},
-                        {"label": "By month", "value": "M"},
-                    ],
-                    value="D",
-                    clearable=False,
-                ),
-                className="two columns",
-            ),
+            # html.Div(
+            #     dcc.Dropdown(
+            #         id="converted_opportunities_dropdown",
+            #         options=[
+            #             {"label": "By day", "value": "D"},
+            #             {"label": "By week", "value": "W-MON"},
+            #             {"label": "By month", "value": "M"},
+            #         ],
+            #         value="D",
+            #         clearable=False,
+            #     ),
+            #     className="two columns",
+            # ),
 
             html.Div(
                 dcc.Dropdown(
@@ -500,19 +500,19 @@ layout = [
         [
             html.Div(
                 [
-                    html.P(
-                        "Top Open opportunities",
-                        style={
-                            "color": "#2a3f5f",
-                            "fontSize": "13px",
-                            "textAlign": "center",
-                            "marginBottom": "0",
-                        },
-                    ),
-                    html.Div(
-                        id="top_open_opportunities",
-                        style={"padding": "0px 13px 5px 13px", "marginBottom": "5"},
-                    ),
+                    # html.P(
+                    #     "Top Open opportunities",
+                    #     style={
+                    #         "color": "#2a3f5f",
+                    #         "fontSize": "13px",
+                    #         "textAlign": "center",
+                    #         "marginBottom": "0",
+                    #     },
+                    # ),
+                    # html.Div(
+                    #     id="top_open_opportunities",
+                    #     style={"padding": "0px 13px 5px 13px", "marginBottom": "5"},
+                    # ),
 
                 ],
                 className="six columns",
@@ -526,19 +526,19 @@ layout = [
             ),
             html.Div(
                 [
-                    html.P(
-                        "Top Lost opportunities",
-                        style={
-                            "color": "#2a3f5f",
-                            "fontSize": "13px",
-                            "textAlign": "center",
-                            "marginBottom": "0",
-                        },
-                    ),
-                    html.Div(
-                        id="top_lost_opportunities",
-                        style={"padding": "0px 13px 5px 13px", "marginBottom": "5"},
-                    )
+                    # html.P(
+                    #     "Top Lost opportunities",
+                    #     style={
+                    #         "color": "#2a3f5f",
+                    #         "fontSize": "13px",
+                    #         "textAlign": "center",
+                    #         "marginBottom": "0",
+                    #     },
+                    # ),
+                    # html.Div(
+                    #     id="top_lost_opportunities",
+                    #     style={"padding": "0px 13px 5px 13px", "marginBottom": "5"},
+                    # )
                 ],
                 className="six columns",
                 style={
