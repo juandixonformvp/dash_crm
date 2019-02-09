@@ -11,7 +11,8 @@ import dash_html_components as html
 import plotly.plotly as py
 from plotly import graph_objs as go
 
-from app import app, indicator, millify, df_to_table, sf_manager
+# from app import app, indicator, millify, df_to_table, sf_manager
+from app import app, indicator, sf_manager
 
 states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
           "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
@@ -413,136 +414,136 @@ layout = [
 ]
 
 
-# updates left indicator based on df updates
-@app.callback(
-    Output("left_leads_indicator", "children"), [Input("leads_df", "children")]
-)
-def left_leads_indicator_callback(df):
-    df = pd.read_json(df, orient="split")
-    converted_leads = len(df[df["Status"] == "Closed - Converted"].index)
-    return converted_leads
-
-
-# updates middle indicator based on df updates
-@app.callback(
-    Output("middle_leads_indicator", "children"), [Input("leads_df", "children")]
-)
-def middle_leads_indicator_callback(df):
-    df = pd.read_json(df, orient="split")
-    open_leads = len(
-        df[
-            (df["Status"] == "Open - Not Contacted")
-            | (df["Status"] == "Working - Contacted")
-            ].index
-    )
-    return open_leads
-
-
-# updates right indicator based on df updates
-@app.callback(
-    Output("right_leads_indicator", "children"), [Input("leads_df", "children")]
-)
-def right_leads_indicator_callback(df):
-    df = pd.read_json(df, orient="split")
-    converted_leads = len(df[df["Status"] == "Closed - Converted"].index)
-    lost_leads = len(df[df["Status"] == "Closed - Not Converted"].index)
-    conversion_rates = converted_leads / (converted_leads + lost_leads) * 100
-    conversion_rates = "%.2f" % conversion_rates + "%"
-    return conversion_rates
-
-
-# update pie chart figure based on dropdown's value and df updates
-@app.callback(
-    Output("lead_source", "figure"),
-    [Input("lead_source_dropdown", "value"), Input("leads_df", "children")],
-)
-def lead_source_callback(status, df):
-    df = pd.read_json(df, orient="split")
-    return lead_source(status, df)
-
-
-# update heat map figure based on dropdown's value and df updates
-@app.callback(
-    Output("map", "figure"),
-    [Input("lead_source_dropdown", "value"), Input("leads_df", "children")],
-)
-def map_callback(status, df):
-    df = pd.read_json(df, orient="split")
-    return choropleth_map(status, df)
-
-
-# update table based on dropdown's value and df updates
-@app.callback(
-    Output("leads_table", "children"),
-    [Input("lead_source_dropdown", "value"), Input("leads_df", "children")],
-)
-def leads_table_callback(status, df):
-    df = pd.read_json(df, orient="split")
-    if status == "open":
-        df = df[
-            (df["Status"] == "Open - Not Contacted")
-            | (df["Status"] == "Working - Contacted")
-            ]
-    elif status == "converted":
-        df = df[df["Status"] == "Closed - Converted"]
-    elif status == "lost":
-        df = df[df["Status"] == "Closed - Not Converted"]
-    df = df[["CreatedDate", "Status", "Company", "State", "LeadSource"]]
-    return df_to_table(df)
-
-
-# update pie chart figure based on dropdown's value and df updates
-@app.callback(
-    Output("converted_leads", "figure"),
-    [Input("converted_leads_dropdown", "value"), Input("leads_df", "children")],
-)
-def converted_leads_callback(period, df):
-    df = pd.read_json(df, orient="split")
-    return converted_leads_count(period, df)
-
-
-# hide/show modal
-@app.callback(Output("leads_modal", "style"), [Input("new_lead", "n_clicks")])
-def display_leads_modal_callback(n):
-    if n > 0:
-        return {"display": "block"}
-    return {"display": "none"}
-
-
-# reset to 0 add button n_clicks property
-@app.callback(
-    Output("new_lead", "n_clicks"),
-    [Input("leads_modal_close", "n_clicks"), Input("submit_new_lead", "n_clicks")],
-)
-def close_modal_callback(n, n2):
-    return 0
-
-
-# add new lead to salesforce and stores new df in hidden div
-@app.callback(
-    Output("leads_df", "children"),
-    [Input("submit_new_lead", "n_clicks")],
-    [
-        State("new_lead_status", "value"),
-        State("new_lead_state", "value"),
-        State("new_lead_company", "value"),
-        State("new_lead_source", "value"),
-        State("leads_df", "children"),
-    ],
-)
-def add_lead_callback(n_clicks, status, state, company, source, current_df):
-    if n_clicks > 0:
-        if company == "":
-            company = "Not named yet"
-        query = {
-            "LastName": company,
-            "Company": company,
-            "Status": status,
-            "State": state,
-            "LeadSource": source,
-        }
-        sf_manager.add_lead(query)
-        df = sf_manager.get_leads()
-        return df.to_json(orient="split")
-
-    return current_df
+# # updates left indicator based on df updates
+# @app.callback(
+#     Output("left_leads_indicator", "children"), [Input("leads_df", "children")]
+# )
+# def left_leads_indicator_callback(df):
+#     df = pd.read_json(df, orient="split")
+#     converted_leads = len(df[df["Status"] == "Closed - Converted"].index)
+#     return converted_leads
+#
+#
+# # updates middle indicator based on df updates
+# @app.callback(
+#     Output("middle_leads_indicator", "children"), [Input("leads_df", "children")]
+# )
+# def middle_leads_indicator_callback(df):
+#     df = pd.read_json(df, orient="split")
+#     open_leads = len(
+#         df[
+#             (df["Status"] == "Open - Not Contacted")
+#             | (df["Status"] == "Working - Contacted")
+#             ].index
+#     )
+#     return open_leads
+#
+#
+# # updates right indicator based on df updates
+# @app.callback(
+#     Output("right_leads_indicator", "children"), [Input("leads_df", "children")]
+# )
+# def right_leads_indicator_callback(df):
+#     df = pd.read_json(df, orient="split")
+#     converted_leads = len(df[df["Status"] == "Closed - Converted"].index)
+#     lost_leads = len(df[df["Status"] == "Closed - Not Converted"].index)
+#     conversion_rates = converted_leads / (converted_leads + lost_leads) * 100
+#     conversion_rates = "%.2f" % conversion_rates + "%"
+#     return conversion_rates
+#
+#
+# # update pie chart figure based on dropdown's value and df updates
+# @app.callback(
+#     Output("lead_source", "figure"),
+#     [Input("lead_source_dropdown", "value"), Input("leads_df", "children")],
+# )
+# def lead_source_callback(status, df):
+#     df = pd.read_json(df, orient="split")
+#     return lead_source(status, df)
+#
+#
+# # update heat map figure based on dropdown's value and df updates
+# @app.callback(
+#     Output("map", "figure"),
+#     [Input("lead_source_dropdown", "value"), Input("leads_df", "children")],
+# )
+# def map_callback(status, df):
+#     df = pd.read_json(df, orient="split")
+#     return choropleth_map(status, df)
+#
+#
+# # update table based on dropdown's value and df updates
+# @app.callback(
+#     Output("leads_table", "children"),
+#     [Input("lead_source_dropdown", "value"), Input("leads_df", "children")],
+# )
+# def leads_table_callback(status, df):
+#     df = pd.read_json(df, orient="split")
+#     if status == "open":
+#         df = df[
+#             (df["Status"] == "Open - Not Contacted")
+#             | (df["Status"] == "Working - Contacted")
+#             ]
+#     elif status == "converted":
+#         df = df[df["Status"] == "Closed - Converted"]
+#     elif status == "lost":
+#         df = df[df["Status"] == "Closed - Not Converted"]
+#     df = df[["CreatedDate", "Status", "Company", "State", "LeadSource"]]
+#     return df_to_table(df)
+#
+#
+# # update pie chart figure based on dropdown's value and df updates
+# @app.callback(
+#     Output("converted_leads", "figure"),
+#     [Input("converted_leads_dropdown", "value"), Input("leads_df", "children")],
+# )
+# def converted_leads_callback(period, df):
+#     df = pd.read_json(df, orient="split")
+#     return converted_leads_count(period, df)
+#
+#
+# # hide/show modal
+# @app.callback(Output("leads_modal", "style"), [Input("new_lead", "n_clicks")])
+# def display_leads_modal_callback(n):
+#     if n > 0:
+#         return {"display": "block"}
+#     return {"display": "none"}
+#
+#
+# # reset to 0 add button n_clicks property
+# @app.callback(
+#     Output("new_lead", "n_clicks"),
+#     [Input("leads_modal_close", "n_clicks"), Input("submit_new_lead", "n_clicks")],
+# )
+# def close_modal_callback(n, n2):
+#     return 0
+#
+#
+# # add new lead to salesforce and stores new df in hidden div
+# @app.callback(
+#     Output("leads_df", "children"),
+#     [Input("submit_new_lead", "n_clicks")],
+#     [
+#         State("new_lead_status", "value"),
+#         State("new_lead_state", "value"),
+#         State("new_lead_company", "value"),
+#         State("new_lead_source", "value"),
+#         State("leads_df", "children"),
+#     ],
+# )
+# def add_lead_callback(n_clicks, status, state, company, source, current_df):
+#     if n_clicks > 0:
+#         if company == "":
+#             company = "Not named yet"
+#         query = {
+#             "LastName": company,
+#             "Company": company,
+#             "Status": status,
+#             "State": state,
+#             "LeadSource": source,
+#         }
+#         sf_manager.add_lead(query)
+#         df = sf_manager.get_leads()
+#         return df.to_json(orient="split")
+#
+#     return current_df

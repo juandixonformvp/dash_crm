@@ -10,7 +10,7 @@ from plotly import graph_objs as go
 import math
 from app import app, server, sf_manager
 # from apps import opportunities, cases, leads
-from apps import opportunities, cases
+from apps import opportunities, cases, leads
 
 app.layout = html.Div(
     [
@@ -83,8 +83,8 @@ def render_content(tab):
         return opportunities.layout
     elif tab == "cases_tab":
         return cases.layout
-    # elif tab == "leads_tab":
-    #     return leads.layout
+    elif tab == "leads_tab":
+        return leads.layout
     else:
         return opportunities.layout
 
