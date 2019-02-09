@@ -11,13 +11,14 @@ import dash_html_components as html
 import plotly.plotly as py
 from plotly import graph_objs as go
 
-from app import app, indicator, millify, df_to_table, sf_manager
+# from app import app, indicator, millify, df_to_table, sf_manager
+from app import app, indicator, sf_manager
 
 colors = {"background": "#F3F6FA", "background_div": "white"}
 
-accounts = sf_manager.get_accounts()
-contacts = sf_manager.get_contacts()
-users = sf_manager.get_users()
+# accounts = sf_manager.get_accounts()
+# contacts = sf_manager.get_contacts()
+# users = sf_manager.get_users()
 
 
 # returns pie chart based on filters values
@@ -121,33 +122,33 @@ def cases_by_period(df, period, priority, origin):
     return {"data": data, "layout": layout}
 
 
-def cases_by_account(cases):
-    cases = cases.dropna(subset=["AccountId"])
-    cases = pd.merge(cases, accounts, left_on="AccountId", right_on="Id")
-    cases = cases.groupby(["AccountId", "Name"]).count()
-    cases = cases.sort_values('IsDeleted')
-    data = [go.Bar(y=cases.index.get_level_values('Name'), x=cases["IsDeleted"],
-                   orientation="h")]  # x could be any column value since its a count
-
-    layout = go.Layout(
-        barmode="stack",
-        margin=dict(l=210, r=25, b=20, t=0, pad=4),
-        paper_bgcolor="white",
-        plot_bgcolor="white",
-    )
-
-    return {"data": data, "layout": layout}
+# def cases_by_account(cases):
+#     cases = cases.dropna(subset=["AccountId"])
+#     cases = pd.merge(cases, accounts, left_on="AccountId", right_on="Id")
+#     cases = cases.groupby(["AccountId", "Name"]).count()
+#     cases = cases.sort_values('IsDeleted')
+#     data = [go.Bar(y=cases.index.get_level_values('Name'), x=cases["IsDeleted"],
+#                    orientation="h")]  # x could be any column value since its a count
+#
+#     layout = go.Layout(
+#         barmode="stack",
+#         margin=dict(l=210, r=25, b=20, t=0, pad=4),
+#         paper_bgcolor="white",
+#         plot_bgcolor="white",
+#     )
+#
+#     return {"data": data, "layout": layout}
 
 
 # returns modal (hidden by default)
 def modal():
-    contacts["Name"] = (
-            contacts["Salutation"]
-            + " "
-            + contacts["FirstName"]
-            + " "
-            + contacts["LastName"]
-    )
+    # contacts["Name"] = (
+    #         contacts["Salutation"]
+    #         + " "
+    #         + contacts["FirstName"]
+    #         + " "
+    #         + contacts["LastName"]
+    # )
     return html.Div(
         html.Div(
             [
@@ -195,20 +196,20 @@ def modal():
                                                 "marginTop": "4",
                                             },
                                         ),
-                                        html.Div(
-                                            dcc.Dropdown(
-                                                id="new_case_account",
-                                                options=[
-                                                    {
-                                                        "label": row["Name"],
-                                                        "value": row["Id"],
-                                                    }
-                                                    for index, row in accounts.iterrows()
-                                                ],
-                                                clearable=False,
-                                                value=accounts.iloc[0].Id,
-                                            )
-                                        ),
+                                        # html.Div(
+                                        #     dcc.Dropdown(
+                                        #         id="new_case_account",
+                                        #         options=[
+                                        #             {
+                                        #                 "label": row["Name"],
+                                        #                 "value": row["Id"],
+                                        #             }
+                                        #             for index, row in accounts.iterrows()
+                                        #         ],
+                                        #         clearable=False,
+                                        #         value=accounts.iloc[0].Id,
+                                        #     )
+                                        # ),
                                         html.P(
                                             "Priority",
                                             style={
@@ -317,20 +318,20 @@ def modal():
                                                 "marginTop": "4",
                                             },
                                         ),
-                                        html.Div(
-                                            dcc.Dropdown(
-                                                id="new_case_contact",
-                                                options=[
-                                                    {
-                                                        "label": row["Name"],
-                                                        "value": row["Id"],
-                                                    }
-                                                    for index, row in contacts.iterrows()
-                                                ],
-                                                clearable=False,
-                                                value=contacts.iloc[0].Id,
-                                            )
-                                        ),
+                                        # html.Div(
+                                        #     dcc.Dropdown(
+                                        #         id="new_case_contact",
+                                        #         options=[
+                                        #             {
+                                        #                 "label": row["Name"],
+                                        #                 "value": row["Id"],
+                                        #             }
+                                        #             for index, row in contacts.iterrows()
+                                        #         ],
+                                        #         clearable=False,
+                                        #         value=contacts.iloc[0].Id,
+                                        #     )
+                                        # ),
                                         html.P(
                                             "Type",
                                             style={
@@ -600,133 +601,133 @@ layout = [
 ]
 
 
-@app.callback(
-    Output("left_cases_indicator", "children"), [Input("cases_df", "children")]
-)
-def left_cases_indicator_callback(df):
-    df = pd.read_json(df, orient="split")
-    low = len(df[(df["Priority"] == "Low") & (df["Status"] == "New")]["Priority"].index)
-    return low
-
-
-@app.callback(
-    Output("middle_cases_indicator", "children"), [Input("cases_df", "children")]
-)
-def middle_cases_indicator_callback(df):
-    df = pd.read_json(df, orient="split")
-    medium = len(df[(df["Priority"] == "Medium") & (df["Status"] == "New")]["Priority"].index)
-    return medium
-
-
-@app.callback(
-    Output("right_cases_indicator", "children"), [Input("cases_df", "children")]
-)
-def right_cases_indicator_callback(df):
-    df = pd.read_json(df, orient="split")
-    high = len(df[(df["Priority"] == "High") & (df["Status"] == "New")]["Priority"].index)
-    return high
-
-
-@app.callback(
-    Output("cases_reasons", "figure"),
-    [
-        Input("priority_dropdown", "value"),
-        Input("origin_dropdown", "value"),
-        Input("cases_df", "children"),
-    ],
-)
-def cases_reasons_callback(priority, origin, df):
-    df = pd.read_json(df, orient="split")
-    return pie_chart(df, "Reason", priority, origin)
-
-
-@app.callback(
-    Output("cases_types", "figure"),
-    [
-        Input("priority_dropdown", "value"),
-        Input("origin_dropdown", "value"),
-        Input("cases_df", "children"),
-    ],
-)
-def cases_types_callback(priority, origin, df):
-    df = pd.read_json(df, orient="split")
-    return pie_chart(df, "Type", priority, origin)
-
-
-@app.callback(
-    Output("cases_by_period", "figure"),
-    [
-        Input("cases_period_dropdown", "value"),
-        Input("origin_dropdown", "value"),
-        Input("priority_dropdown", "value"),
-        Input("cases_df", "children"),
-    ],
-)
-def cases_period_callback(period, origin, priority, df):
-    df = pd.read_json(df, orient="split")
-    return cases_by_period(df, period, priority, origin)
-
-
-@app.callback(
-    Output("cases_by_account", "figure"),
-    [
-        Input("cases_df", "children"),
-    ],
-)
-def cases_account_callback(df):
-    df = pd.read_json(df, orient="split")
-    return cases_by_account(df)
-
-
-@app.callback(Output("cases_modal", "style"), [Input("new_case", "n_clicks")])
-def display_cases_modal_callback(n):
-    if n > 0:
-        return {"display": "block"}
-    return {"display": "none"}
-
-
-@app.callback(
-    Output("new_case", "n_clicks"),
-    [Input("cases_modal_close", "n_clicks"), Input("submit_new_case", "n_clicks")],
-)
-def close_modal_callback(n, n2):
-    return 0
-
-
-@app.callback(
-    Output("cases_df", "children"),
-    [Input("submit_new_case", "n_clicks")],
-    [
-        State("new_case_account", "value"),
-        State("new_case_origin", "value"),
-        State("new_case_reason", "value"),
-        State("new_case_subject", "value"),
-        State("new_case_contact", "value"),
-        State("new_case_type", "value"),
-        State("new_case_status", "value"),
-        State("new_case_description", "value"),
-        State("new_case_priority", "value"),
-        State("cases_df", "children"),
-    ],
-)
-def add_case_callback(
-        n_clicks, account_id, origin, reason, subject, contact_id, case_type, status, description, priority, current_df
-):
-    if n_clicks > 0:
-        query = {
-            "AccountId": account_id,
-            "Origin": origin,
-            "Reason": reason,
-            "Subject": subject,
-            "ContactId": contact_id,
-            "Type": case_type,
-            "Status": status,
-            "Description": description,
-            "Priority": priority,
-        }
-
-        sf_manager.add_case(query)
-        df = sf_manager.get_cases()
-        return df.to_json(orient="split")
-
-    return current_df
+# @app.callback(
+#     Output("left_cases_indicator", "children"), [Input("cases_df", "children")]
+# )
+# def left_cases_indicator_callback(df):
+#     df = pd.read_json(df, orient="split")
+#     low = len(df[(df["Priority"] == "Low") & (df["Status"] == "New")]["Priority"].index)
+#     return low
+#
+#
+# @app.callback(
+#     Output("middle_cases_indicator", "children"), [Input("cases_df", "children")]
+# )
+# def middle_cases_indicator_callback(df):
+#     df = pd.read_json(df, orient="split")
+#     medium = len(df[(df["Priority"] == "Medium") & (df["Status"] == "New")]["Priority"].index)
+#     return medium
+#
+#
+# @app.callback(
+#     Output("right_cases_indicator", "children"), [Input("cases_df", "children")]
+# )
+# def right_cases_indicator_callback(df):
+#     df = pd.read_json(df, orient="split")
+#     high = len(df[(df["Priority"] == "High") & (df["Status"] == "New")]["Priority"].index)
+#     return high
+#
+#
+# @app.callback(
+#     Output("cases_reasons", "figure"),
+#     [
+#         Input("priority_dropdown", "value"),
+#         Input("origin_dropdown", "value"),
+#         Input("cases_df", "children"),
+#     ],
+# )
+# def cases_reasons_callback(priority, origin, df):
+#     df = pd.read_json(df, orient="split")
+#     return pie_chart(df, "Reason", priority, origin)
+#
+#
+# @app.callback(
+#     Output("cases_types", "figure"),
+#     [
+#         Input("priority_dropdown", "value"),
+#         Input("origin_dropdown", "value"),
+#         Input("cases_df", "children"),
+#     ],
+# )
+# def cases_types_callback(priority, origin, df):
+#     df = pd.read_json(df, orient="split")
+#     return pie_chart(df, "Type", priority, origin)
+#
+#
+# @app.callback(
+#     Output("cases_by_period", "figure"),
+#     [
+#         Input("cases_period_dropdown", "value"),
+#         Input("origin_dropdown", "value"),
+#         Input("priority_dropdown", "value"),
+#         Input("cases_df", "children"),
+#     ],
+# )
+# def cases_period_callback(period, origin, priority, df):
+#     df = pd.read_json(df, orient="split")
+#     return cases_by_period(df, period, priority, origin)
+#
+#
+# @app.callback(
+#     Output("cases_by_account", "figure"),
+#     [
+#         Input("cases_df", "children"),
+#     ],
+# )
+# def cases_account_callback(df):
+#     df = pd.read_json(df, orient="split")
+#     return cases_by_account(df)
+#
+#
+# @app.callback(Output("cases_modal", "style"), [Input("new_case", "n_clicks")])
+# def display_cases_modal_callback(n):
+#     if n > 0:
+#         return {"display": "block"}
+#     return {"display": "none"}
+#
+#
+# @app.callback(
+#     Output("new_case", "n_clicks"),
+#     [Input("cases_modal_close", "n_clicks"), Input("submit_new_case", "n_clicks")],
+# )
+# def close_modal_callback(n, n2):
+#     return 0
+#
+#
+# @app.callback(
+#     Output("cases_df", "children"),
+#     [Input("submit_new_case", "n_clicks")],
+#     [
+#         State("new_case_account", "value"),
+#         State("new_case_origin", "value"),
+#         State("new_case_reason", "value"),
+#         State("new_case_subject", "value"),
+#         State("new_case_contact", "value"),
+#         State("new_case_type", "value"),
+#         State("new_case_status", "value"),
+#         State("new_case_description", "value"),
+#         State("new_case_priority", "value"),
+#         State("cases_df", "children"),
+#     ],
+# )
+# def add_case_callback(
+#         n_clicks, account_id, origin, reason, subject, contact_id, case_type, status, description, priority, current_df
+# ):
+#     if n_clicks > 0:
+#         query = {
+#             "AccountId": account_id,
+#             "Origin": origin,
+#             "Reason": reason,
+#             "Subject": subject,
+#             "ContactId": contact_id,
+#             "Type": case_type,
+#             "Status": status,
+#             "Description": description,
+#             "Priority": priority,
+#         }
+#
+#         sf_manager.add_case(query)
+#         df = sf_manager.get_cases()
+#         return df.to_json(orient="split")
+#
+#     return current_df
