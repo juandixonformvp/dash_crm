@@ -16,6 +16,9 @@ from plotly import graph_objs as go
 # from app import app, indicator, millify, df_to_table, sf_manager
 from app import app, indicator, sf_manager
 
+header_names =[ 'sepal_length', 'sepal_width', 'petal_length', 'petal_width', 'class']
+df = pd.read_csv('iris.csv',names=header_names)
+
 
 def converted_opportunities(period, source, df):
     df["CreatedDate"] = pd.to_datetime(df["CreatedDate"], format="%Y-%m-%d")
@@ -64,25 +67,38 @@ def converted_opportunities(period, source, df):
 
 
 # returns heat map figure
-def heat_map_fig(df, x, y):
-    z = []
-    for lead_type in y:
-        z_row = []
-        for stage in x:
-            probability = df[(df["StageName"] == stage) & (df["Type"] == lead_type)][
-                "Probability"
-            ].mean()
-            z_row.append(probability)
-        z.append(z_row)
+# def heat_map_fig(df, x, y):
+def heat_map_fig(df):
+    # z = []
+    # for lead_type in y:
+    #     z_row = []
+    #     for stage in x:
+    #         probability = df[(df["StageName"] == stage) & (df["Type"] == lead_type)][
+    #             "Probability"
+    #         ].mean()
+    #         z_row.append(probability)
+    #     z.append(z_row)
 
-    trace = dict(
-        type="heatmap", z=z, x=x, y=y, name="mean probability", colorscale="Blues"
-    )
-    layout = dict(
-        margin=dict(t=25, l=210, b=85, pad=4),
-        paper_bgcolor="white",
-        plot_bgcolor="white",
-    )
+    trace = [
+                go.Scatter(
+                    x=df[df['class'] == i]['petal_length'],
+                    y=df[df['class'] == i]['sepal_length'],
+                    mode='markers',
+                    opacity=0.7,
+                    marker={
+                        'size': 15,
+                        'line': {'width': 0.5, 'color': 'white'}
+                    },
+                    name=i
+                ) for i in df['class'].unique()
+            ],
+    layout = go.Layout(
+                xaxis={'title': 'Petal Length'},
+                yaxis={'title': 'Sepal Length'},
+                margin={'l': 200, 'b': 40, 't': 100, 'r': 200},
+                legend={'x': 0, 'y': 1},
+                hovermode='closest'
+            )
 
     return go.Figure(data=[trace], layout=layout)
 
@@ -471,9 +487,8 @@ layout = [
                 [
                     html.P("Converted Opportunities count"),
                     dcc.Graph(
-                        id="converted_count",
-                        style={"height": "90%", "width": "98%"},
-                        config=dict(displayModeBar=False),
+                        id='Iris_left_Viz',
+
                     ),
                 ],
                 className="four columns chart_div",
@@ -483,9 +498,7 @@ layout = [
                 [
                     html.P("Probabilty heatmap per Stage and Type"),
                     dcc.Graph(
-                        id="heatmap",
-                        style={"height": "90%", "width": "98%"},
-                        config=dict(displayModeBar=False),
+                        id='Iris Viz',
                     ),
                 ],
                 className="eight columns chart_div"
@@ -559,26 +572,27 @@ layout = [
 
 #
 # # updates heatmap figure based on dropdowns values or df updates
-# @app.callback(
-#     Output("heatmap", "figure"),
-#     [Input("heatmap_dropdown", "value"), Input("opportunities_df", "children")],
-# )
+@app.callback(
+    Output("Iris_left_Viz", "figure")
+    # [Input("heatmap_dropdown", "value"), Input("opportunities_df", "children")],
+)
 # def heat_map_callback(stage, df):
-#     df = pd.read_json(df, orient="split")
-#     df = df[pd.notnull(df["Type"])]
-#     x = []
-#     y = df["Type"].unique()
-#     if stage == "all_s":
-#         x = df["StageName"].unique()
-#     elif stage == "cold":
-#         x = ["Needs Analysis", "Prospecting", "Qualification"]
-#     elif stage == "warm":
-#         x = ["Value Proposition", "Id. Decision Makers", "Perception Analysis"]
-#     else:
-#         x = ["Proposal/Price Quote", "Negotiation/Review", "Closed Won"]
-#     return heat_map_fig(df, x, y)
-#
-#
+def heat_map_callback(df):
+    # df = pd.read_json(df, orient="split")
+    # df = df[pd.notnull(df["Type"])]
+    # x = []
+    # y = df["Type"].unique()
+    # if stage == "all_s":
+    #     x = df["StageName"].unique()
+    # elif stage == "cold":
+    #     x = ["Needs Analysis", "Prospecting", "Qualification"]
+    # elif stage == "warm":
+    #     x = ["Value Proposition", "Id. Decision Makers", "Perception Analysis"]
+    # else:
+    #     x = ["Proposal/Price Quote", "Negotiation/Review", "Closed Won"]
+    return heat_map_fig(df)
+
+
 # # updates converted opportunity count graph based on dropdowns values or df updates
 # @app.callback(
 #     Output("converted_count", "figure"),
